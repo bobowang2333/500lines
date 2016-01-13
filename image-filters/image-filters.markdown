@@ -1,7 +1,7 @@
 title: Making Your Own Image Filters
 author: Cate Huston
 
-_Cate Huston is a developer and entrepreneur focused on mobile. She’s lived and worked in the UK, Australia, Canada, China and the United States, as an engineer at Google, an Extreme Blue intern at IBM, and a ski instructor. Cate speaks internationally on mobile development and her writing has been published on sites as varied as Lifehacker, The Daily Beast, The Eloquent Woman and Model View Culture. She co-curates Technically Speaking, blogs at Accidentally in Code and is @catehstn on Twitter._
+_Cate Huston is a developer and entrepreneur focused on mobile. She’s lived and worked in the UK, Australia, Canada, China and the United States, as an engineer at Google, an Extreme Blue intern at IBM, and a ski instructor. Cate speaks internationally on mobile development and her writing has been published on sites as varied as Lifehacker, The Daily Beast, The Eloquent Woman and Model View Culture. She co-curates Technically Speaking, blogs at Accidentally in Code and is [\@catehstn](https://twitter.com/catehstn) on Twitter._
 
 ## A Story of a Brilliant Idea That Wasn’t All That Brilliant
 
@@ -40,7 +40,6 @@ familiar with it from developing programming curricula, and because I knew it
 made it really easy to create visual applications. It’s a tool originally
 designed for artists, so it abstracts away much of the boilerplate. It allowed
 me to play, and to experiment.
-
 
 University, and later work, had filled up my time with other people’s ideas and
 priorities. Part of "finishing" this project was learning how to carve out time
@@ -185,7 +184,7 @@ We’ll focus on the Java-based version although Processing has now been ported
 to other languages, including Javascript, which is awesome if you want to
 upload your apps to the internet.
 
-For this tutorial, I use it in Eclipse by adding core.jar to my build path. If
+For this tutorial, I use it in Eclipse by adding `core.jar` to my build path. If
 you want, you can use the Processing IDE, which removes the need for a lot of
 boilerplate Java code. If you later want to port it over to Processing.js and
 upload it online, you need to replace the file chooser with something else.
@@ -236,9 +235,9 @@ The frequency of the animation is determined by `frameRate()`.
     }
 ```
 
-[^noanim]: If we wanted to create an animated sketch we would not call noLoop()
-(or, if we wanted to start animating later, we would call loop()). The
-frequency of the animation is determined by frameRate().
+[^noanim]: If we wanted to create an animated sketch we would not call `noLoop()`
+(or, if we wanted to start animating later, we would call `loop()`). The
+frequency of the animation is determined by `frameRate()`.
 
 These don’t really do much yet, but run the app again adjusting the constants
 in `WIDTH` and `HEIGHT` to see different sizes.
@@ -247,3 +246,208 @@ in `WIDTH` and `HEIGHT` to see different sizes.
 into `background()` and see what happens - it’s the alpha value, and so if you
 only pass one number in, it is always greyscale. Alternatively, you can call
 `background(int r, int g, int b)`.
+
+### PImage
+
+The [PImage object](http://processing.org/reference/PImage.html) is the
+Processing object that represents an image. We’re going to be using this a lot,
+so it’s worth reading through the documentation.  It has three fields
+(\aosatblref{500l.imagefilters.pimagefields}) as well as some methods that we
+will use (\aosatblref{500l.imagefilters.pimagemethods}).
+
+<markdown>
+<table>
+  <tr>
+    <td>`pixels[]`</td>
+    <td>Array containing the color of every pixel in the image</td>
+  </tr>
+  <tr>
+    <td>`width`</td>
+    <td>Image width in pixels</td>
+  </tr>
+  <tr>
+    <td>`height`</td>
+    <td>Image height in pixels</td>
+  </tr>
+</table>
+: \label{500l.imagefilters.pimagefields} PImage fields
+</markdown>
+<latex>
+\begin{table}
+\centering
+{\footnotesize
+\rowcolors{2}{TableOdd}{TableEven}
+\begin{tabular}{ll}
+\hline
+pixels[] & Array containing the color of every pixel in the image \\
+width & Image width in pixels \\
+height & Image height in pixels \\
+\hline
+\end{tabular}
+}
+\caption{PImage fields}
+\label{500l.imagefilters.pimagefields}
+\end{table}
+</latex>
+
+<markdown>
+<table>
+  <tr>
+    <td>`loadPixels`</td>
+    <td>Loads the pixel data for the image into its `pixels[]` array</td>
+  </tr>
+  <tr>
+    <td>`updatePixels`</td>
+    <td>Updates the image with the data in its `pixels[]` array</td>
+  </tr>
+  <tr>
+    <td>`resize`</td>
+    <td>Changes the size of an image to a new width and height</td>
+  </tr>
+  <tr>
+    <td>`get`</td>
+    <td>Reads the color of any pixel or grabs a rectangle of pixels</td>
+  </tr>
+  <tr>
+    <td>`set`</td>
+    <td>Writes a color to any pixel or writes an image into another</td>
+  </tr>
+  <tr>
+    <td>`save`</td>
+    <td>Saves the image to a TIFF, TARGA, PNG, or JPEG file</td>
+  </tr>
+</table>
+: \label{500l.imagefilters.pimagemethods} PImage methods
+</markdown>
+<latex>
+\begin{table}
+\centering
+{\footnotesize
+\rowcolors{2}{TableOdd}{TableEven}
+\begin{tabular}{ll}
+\hline
+loadPixels & Loads the pixel data for the image into its `pixels[]` array \\
+updatePixels & Updates the image with the data in its `pixels[]` array \\
+resize & Changes the size of an image to a new width and height \\
+get & Reads the color of any pixel or grabs a rectangle of pixels \\
+set & Writes a color to any pixel or writes an image into another \\
+save & Saves the image to a TIFF, TARGA, PNG, or JPEG file \\
+\hline
+\end{tabular}
+}
+\caption{PImage methods}
+\label{500l.imagefilters.pimagemethods}
+\end{table}
+</latex>
+
+### File Chooser
+Processing handles most of this, we just need to call
+[`selectInput()`](http://www.processing.org/reference/selectInput_.html), and
+implement a callback (which must be public). 
+
+To people familiar with Java this might seem odd, a listener or a lambda
+expression might make more sense. However as Processing was developed as a tool
+for artists, for the most part the necessity for these things has been
+abstracted away by the language to keep it unintimidating. This is a choice the
+designers made - to prioritize simplicity and being unintimidating over power
+and flexibility. If you use the stripped down Processing editor, rather than
+Processing as a library in Eclipse you don’t even need to define class names! 
+
+Other language designers with different target audiences make different
+choices, as they should. For example if we consider Haskell, a purely
+functional language, that purity of functional language paradigms is
+prioritised over everything else. This makes it a better tool for mathematical
+problems than anything requiring IO.
+
+```java
+// Called on key press.
+private void chooseFile() {
+	// Choose the file.
+	selectInput("Select a file to process:", "fileSelected");
+}
+
+public void fileSelected(File file) {
+	if (file == null) {
+		println("User hit cancel.");
+	} else {
+		// save the image
+		redraw(); // update the display
+	}
+}
+```
+
+### Responding To Key Presses
+
+Normally in Java doing this requires adding listeners and implementing
+anonymous functions. However like the file chooser, Processing handles a lot of
+this for us. We just need to implement
+[`keyPressed()`](https://www.processing.org/reference/keyPressed_.html).
+
+```java
+public void keyPressed() {
+	print(“key pressed: ” + key);
+}
+```
+
+If you run the app again, every time you press a key it will output it to the
+console. Later, you’ll want to do different things depending on what key was
+pressed, and to do this you just switch on the key value (this exists in the
+`PApplet` superclass, and contains the last key pressed). 
+
+
+## Writing Tests 
+
+This app doesn’t do a lot yet, but we can already see number of places where
+things can go wrong, for example triggering the wrong action with key presses.
+As we add complexity, we add more potential problems, such as updating the
+image state incorrectly, or miscalculations of the pixel colors after applying
+a filter. I also just (some think weirdly) enjoy writing unit tests. Whilst
+some people seem to think of testing as a thing that delays checking code in, I
+see tests as my #1 debugging tool, and an opportunity to deeply understand what
+is going on in my code.
+
+I adore Processing, but as covered above it’s designed as a tool for artists to
+create visual applications, and in this maybe unit testing isn’t a huge
+concern. It’s clear it isn’t written for testability, in fact it’s written in
+such a way that makes it untestable, as is. Part of this is because it hides
+complexity, some of that hidden complexity is really useful in writing unit
+tests. The use of static and final methods make it much harder to use mocks
+(objects that record interaction and allow you to fake part of your system to
+verify another part is behaving correctly), which rely on the ability to
+subclass. 
+
+We might start a greenfield project with great intentions to do Test Driven
+Development (TDD) and achieve perfect test coverage, but in reality we are
+usually looking at a mass of code written by various and assorted people and
+trying to figure out what it is supposed to be doing, and how and why it is
+going wrong. Then maybe we don’t write perfect tests, but writing tests at all
+will help us navigate this situation, document what is happening and move
+forward.
+
+To do that we create "seams" that will allow us to break something up from it’s
+amorphous mass of tangled pieces and verify. To do this, we will sometimes
+create wrapper classes that can be mocked. These do nothing more than hold a
+collection of similar methods, or forward calls on to another object that can
+not be mocked (due to final or static methods), and as such they are very dull
+to write, but key to creating seams and making the code testable.
+
+For tests, as I was working in Java with Processing as a library, I used JUnit.
+For mocking, I used Mockito. You can download
+[mockito](https://code.google.com/p/mockito/downloads/list) and add the jar to
+your buildpath in the same way you added `core.jar`. I created two helper
+classes that make it possible to mock and test the app (otherwise we can’t test
+behavior involving `PImage` or `PApplet` methods).
+
+`IFAImage` is a thin wrapper around PImage. `PixelColorHelper` is a wrapper
+around applet pixel color methods. These wrappers call the final, and static
+methods, but the caller methods are neither final nor static themselves - this
+allows them to be mocked. These are deliberately lightweight, and we could have
+gone further, however this was sufficient to address the major problem of
+testability when using Processing - static, and final methods. The goal here
+was to make an app after all - not a unit testing framework for Processing!
+
+A class called `ImageState` forms the "model" of this application, removing as
+much logic from the class extending `PApplet` as possible, for better
+testability. It also makes for a cleaner design and separation of concerns -
+the `App` controls the interactions and the UI, not the details of the image
+manipulation.

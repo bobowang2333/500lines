@@ -6,8 +6,8 @@ United States, as an engineer at Google, an Extreme Blue intern at IBM,
 and a ski instructor. Cate speaks internationally on mobile development
 and her writing has been published on sites as varied as Lifehacker, The
 Daily Beast, The Eloquent Woman and Model View Culture. She co-curates
-Technically Speaking, blogs at Accidentally in Code and is @catehstn on
-Twitter.}
+Technically Speaking, blogs at Accidentally in Code and is
+\href{https://twitter.com/catehstn}{@catehstn} on Twitter.}
 
 \aosasecti{A Story of a Brilliant Idea That Wasn't All That
 Brilliant}\label{a-story-of-a-brilliant-idea-that-wasnt-all-that-brilliant}
@@ -216,16 +216,15 @@ We'll focus on the Java-based version although Processing has now been
 ported to other languages, including Javascript, which is awesome if you
 want to upload your apps to the internet.
 
-For this tutorial, I use it in Eclipse by adding core.jar to my build
-path. If you want, you can use the Processing IDE, which removes the
-need for a lot of boilerplate Java code. If you later want to port it
-over to Processing.js and upload it online, you need to replace the file
-chooser with something else.
+For this tutorial, I use it in Eclipse by adding \texttt{core.jar} to my
+build path. If you want, you can use the Processing IDE, which removes
+the need for a lot of boilerplate Java code. If you later want to port
+it over to Processing.js and upload it online, you need to replace the
+file chooser with something else.
 
 There are detailed instructions with screenshots in the project's
-\href{https://github.com/aosabook/500lines/blob/master/image-filters/SETUP.MD}{repository
-in SETUP.MD}. If you are familiar with Eclipse and Java already you may
-not need them.
+\href{https://github.com/aosabook/500lines/blob/master/image-filters/SETUP.MD}{repository}.
+If you are familiar with Eclipse and Java already you may not need them.
 
 \aosasecti{Processing Basics}\label{processing-basics}
 
@@ -280,5 +279,168 @@ number passed into \texttt{background()} and see what happens - it's the
 alpha value, and so if you only pass one number in, it is always
 greyscale. Alternatively, you can call
 \texttt{background(int r, int g, int b)}.
+
+\aosasectii{PImage}\label{pimage}
+
+The \href{http://processing.org/reference/PImage.html}{PImage object} is
+the Processing object that represents an image. We're going to be using
+this a lot, so it's worth reading through the documentation. It has
+three fields (\aosatblref{500l.imagefilters.pimagefields}) as well as
+some methods that we will use
+(\aosatblref{500l.imagefilters.pimagemethods})\textgreater{}
+
+\begin{table}
+\centering
+{\footnotesize
+\rowcolors{2}{TableOdd}{TableEven}
+\begin{tabular}{ll}
+\hline
+`pixels[]` & Array containing the color of every pixel in the image \\
+`width` & Image width in pixels \\
+`height` & Image height in pixels \\
+\hline
+\end{tabular}
+}
+\caption{PImage fields}
+\label{500l.imagefilters.pimagefields}
+\end{table}
+
+\begin{table}
+\centering
+{\footnotesize
+\rowcolors{2}{TableOdd}{TableEven}
+\begin{tabular}{ll}
+\hline
+`loadPixels` & Loads the pixel data for the image into its `pixels[]` array \\
+`updatePixels` & Updates the image with the data in its `pixels[]` array \\
+`resize` & Changes the size of an image to a new width and height \\
+`get` & Reads the color of any pixel or grabs a rectangle of pixels \\
+`set` & Writes a color to any pixel or writes an image into another \\
+`save` & Saves the image to a TIFF, TARGA, PNG, or JPEG file \\
+\hline
+\end{tabular}
+}
+\caption{PImage methods}
+\label{500l.imagefilters.pimagemethods}
+\end{table}
+
+\aosasectii{File Chooser}\label{file-chooser}
+
+Processing handles most of this, we just need to call
+\href{http://www.processing.org/reference/selectInput_.html}{\texttt{selectInput()}},
+and implement a callback (which must be public).
+
+To people familiar with Java this might seem odd, a listener or a lambda
+expression might make more sense. However as Processing was developed as
+a tool for artists, for the most part the necessity for these things has
+been abstracted away by the language to keep it unintimidating. This is
+a choice the designers made - to prioritize simplicity and being
+unintimidating over power and flexibility. If you use the stripped down
+Processing editor, rather than Processing as a library in Eclipse you
+don't even need to define class names!
+
+Other language designers with different target audiences make different
+choices, as they should. For example if we consider Haskell, a purely
+functional language, that purity of functional language paradigms is
+prioritised over everything else. This makes it a better tool for
+mathematical problems than anything requiring IO.
+
+\begin{verbatim}
+// Called on key press.
+private void chooseFile() {
+    // Choose the file.
+    selectInput("Select a file to process:", "fileSelected");
+}
+
+public void fileSelected(File file) {
+    if (file == null) {
+        println("User hit cancel.");
+    } else {
+        // save the image
+        redraw(); // update the display
+    }
+}
+\end{verbatim}
+
+\aosasectii{Responding To Key Presses}\label{responding-to-key-presses}
+
+Normally in Java doing this requires adding listeners and implementing
+anonymous functions. However like the file chooser, Processing handles a
+lot of this for us. We just need to implement
+\href{https://www.processing.org/reference/keyPressed_.html}{\texttt{keyPressed()}}.
+
+\begin{verbatim}
+public void keyPressed() {
+    print(“key pressed: ” + key);
+}
+\end{verbatim}
+
+If you run the app again, every time you press a key it will output it
+to the console. Later, you'll want to do different things depending on
+what key was pressed, and to do this you just switch on the key value
+(this exists in the PApplet superclass, and contains the last key
+pressed).
+
+\aosasecti{Writing Tests}\label{writing-tests}
+
+This app doesn't do a lot yet, but we can already see number of places
+where things can go wrong, for example triggering the wrong action with
+key presses. As we add complexity, we add more potential problems, such
+as updating the image state incorrectly, or miscalculations of the pixel
+colors after applying a filter. I also just (some think weirdly) enjoy
+writing unit tests. Whilst some people seem to think of testing as a
+thing that delays checking code in, I see tests as my \#1 debugging
+tool, and an opportunity to deeply understand what is going on in my
+code.
+
+I adore Processing, but as covered above it's designed as a tool for
+artists to create visual applications, and in this maybe unit testing
+isn't a huge concern. It's clear it isn't written for testability, in
+fact it's written in such a way that makes it untestable, as is. Part of
+this is because it hides complexity, some of that hidden complexity is
+really useful in writing unit tests. The use of static and final methods
+make it much harder to use mocks (objects that record interaction and
+allow you to fake part of your system to verify another part is behaving
+correctly), which rely on the ability to subclass.
+
+We might start a greenfield project with great intentions to do Test
+Driven Development (TDD) and achieve perfect test coverage, but in
+reality we are usually looking at a mass of code written by various and
+assorted people and trying to figure out what it is supposed to be
+doing, and how and why it is going wrong. Then maybe we don't write
+perfect tests, but writing tests at all will help us navigate this
+situation, document what is happening and move forward.
+
+To do that we create ``seams'' that will allow us to break something up
+from it's amorphous mass of tangled pieces and verify. To do this, we
+will sometimes create wrapper classes that can be mocked. These do
+nothing more than hold a collection of similar methods, or forward calls
+on to another object that can not be mocked (due to final or static
+methods), and as such they are very dull to write, but key to creating
+seams and making the code testable.
+
+For tests, as I was working in Java with Processing as a library, I used
+JUnit. For mocking, I used Mockito. You can download
+\href{https://code.google.com/p/mockito/downloads/list}{mockito} and add
+the jar to your buildpath in the same way you added \texttt{core.jar}. I
+created two helper classes that make it possible to mock and test the
+app (otherwise we can't test behavior involving \texttt{PImage} or
+\texttt{PApplet} methods).
+
+\texttt{IFAImage} is a thin wrapper around PImage.
+\texttt{PixelColorHelper} is a wrapper around applet pixel color
+methods. These wrappers call the final, and static methods, but the
+caller methods are neither final nor static themselves - this allows
+them to be mocked. These are deliberately lightweight, and we could have
+gone further, however this was sufficient to address the major problem
+of testability when using Processing - static, and final methods. The
+goal here was to make an app after all - not a unit testing framework
+for Processing!
+
+A class called \texttt{ImageState} forms the ``model'' of this
+application, removing as much logic from the class extending
+\texttt{PApplet} as possible, for better testability. It also makes for
+a cleaner design and separation of concerns - the \texttt{App} controls
+the interactions and the UI, not the details of the image manipulation.
 
 \end{aosachapter}
